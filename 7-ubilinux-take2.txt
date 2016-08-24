@@ -1,0 +1,416 @@
+2015-Sept-12  Redo Ubilinux On Edison Install
+
+WHY:
+Hacks done on previous install to free up disk space while trying
+to install ROS (like deleting perl, stuff out of /usr/share, etc) 
+from rootfs are causing installation issues of subsequent packages
+using apt-get... in particular, need to install xboxdrv to get
+joystick input and thats not cooperating. 
+
+RECAP Previous Ubilinux install
+
+1. flash ubilinux
+   ubilinux-edison-150309.tar.gz has toFlash dir which has flashall.sh script used to flash edison emmc
+
+2  install rt-kernel from ww42-14 edison yocto release
+3  installed ROS indigo
+
+===== start backups ====
+
+1. backup items added to base ubilinux
+
+1.1 rt-kernel 
+    /boot/bzimage-rt
+    /lib/modules/rt-kern-ver
+
+    to reinstall, replace above 2 items, 
+    cd /boot
+    cp vmlinux vmlinux-ubilinux 
+    cp bzimage-rt vmlinux
+    no chgs needed to /boot/syscfg file
+
+1.2 ROS Indigo Install  (so we dont have to rebuilt from scratch)
+
+iqdean@ubilinux:~/bkups$ tar cvzf ubi1-boot.tgz /boot
+iqdean@ubilinux:~/bkups$ tar cvzf ubi1-lib-modules-rtkern.tgz /lib/modules/3.10.17-rt12-poky-edison-preempt_rt
+
+iqdean@ubilinux:/home$ tree -L 2
+.
+├── bkups
+│   ├── ubi1-boot.tgz
+│   ├── ubi1-home-iqdean.tgz
+│   ├── ubi1-home-ros-indigo.tgz
+│   └── ubi1-lib-modules-rtkern.tgz
+├── edison
+├── iqdean
+│   ├── external_src
+│   ├── hello_world_tutorial
+│   └── ros_catkin_ws
+├── lost+found [error opening dir]
+└── ros
+    └── indigo
+
+9 directories, 4 files
+
+iqdean@ubilinux:/home$ ls -al bkups/
+total 94232
+drwxr-xr-x 2 iqdean iqdean     4096 Sep 13 06:55 .
+drwxr-xr-x 7 root   root       4096 Sep 13 06:52 ..
+-rw-r--r-- 1 iqdean iqdean 15675204 Sep 13 06:41 ubi1-boot.tgz
+-rw-r--r-- 1 root   root   76813073 Sep 13 06:56 ubi1-home-iqdean.tgz 
+-rw-r--r-- 1 iqdean iqdean  3394123 Sep 13 06:49 ubi1-home-ros-indigo.tgz
+-rw-r--r-- 1 iqdean iqdean   593958 Sep 13 06:46 ubi1-lib-modules-rtkern.tgz
+
+ssh'd to u1204 notebook
+-----------------------
+
+iqdean@iqdean-laptop:~/u1204/intel-edison/ubilinux$ tree ubi1-bkups/
+ubi1-bkups/
+└── bkups
+    ├── ubi1-boot.tgz
+    ├── ubi1-home-iqdean.tgz
+    ├── ubi1-home-ros-indigo.tgz
+    └── ubi1-lib-modules-rtkern.tgz
+
+1 directory, 4 files
+
+iqdean@iqdean-laptop:~/u1204/intel-edison/ubilinux$ ls -al ubi1-bkups/bkups/
+total 94224
+drwxrwxrwx 1 root root      432 Sep 13 00:04 .
+drwxrwxrwx 1 root root      144 Sep 13 00:04 ..
+-rwxrwxrwx 1 root root 15675204 Sep 13 00:05 ubi1-boot.tgz		<- rt kern
+-rwxrwxrwx 1 root root 76813073 Sep 13 00:06 ubi1-home-iqdean.tgz          <- in case need to rebuild ros
+-rwxrwxrwx 1 root root  3394123 Sep 13 00:04 ubi1-home-ros-indigo.tgz   <- ros install dir
+-rwxrwxrwx 1 root root   593958 Sep 13 00:04 ubi1-lib-modules-rtkern.tgz<- rt kern
+
+=== end backups ===
+
+=== start reflash ubilinux to edison ===
+
+2 reflash ubilinux to edison
+
+   REF: /home/iqdean/u1204/intel-edison/ubilinux/ ubilinux-1.txt
+
+                     Before    ----- After -----------  before/after boot to os
+                     pre-os    post-os
+    Ed - J16 USB <-> power,    usb eth, arduino serial
+         J3  USB <-> fw/uboot  Linux serial console
+
+power down robot          < since J16 provides pwr, with robot pwrd off when u
+			    1. robot main pwr switch   off
+      	   		    2. plug in J16 to laptop, edison pwrs up, so
+			    2.1 unplug J16, now edison is off
+			    3. to pwr up the edison, 
+			       plug in J16 & 
+			       turn on robot main pwr switch to provide ed
+			        with external power
+
+term1: $ sudo screen /dev/ttyUSB0 115200      w main pwr off, J3 plugged in, J16 unplugged  (ed is pwrd off)
+       	      	     		  	      w J3 plugged, $ ls /dev/ttyUSB*  to verify /dev/ttyUSB0
+       	      	     			      ctrl-a d  to exit screen
+
+term2: <toFlash_dir>$ sudo ./flashall.sh      from ~/u1204/intel-edison/ubilinux/toFlash
+power on the robot    	   		      plug in J16
+      	     				      flip main pwr switch on  < optional, but won't hurt
+
+term1: as soon as uboot starts     term2: starts downloading ifwi
+                                          resets
+  can watch whats happening               starts downloading boot partition (kernel)
+  in term1     		                  starts downloading rootfs (can take up to 10mins)
+                                          resets
+reboots, kernel starts up
+         does a bunch of formating
+reboots again
+
+Debian GNU/Linux 7 ubilinux ttyMFD2
+
+ubilinux login: root
+password:       edison		< this is the root pw on ubilinux for edison
+
+Linux ubilinux 3.10.17-yocto-standard-r2 #7 SMP PREEMPT Thu Feb 26 09:57:06 UTC 2015 i686
+
+Debian GNU/Linux 7 ubilinux ttyMFD2
+
+ubilinux login: root
+Password:	edison
+Last login: Sat Jan  1 00:02:28 UTC 2000 on ttyMFD2
+Linux ubilinux 3.10.17-yocto-standard-r2 #7 SMP PREEMPT Thu Feb 26 09:57:06 UTC 2015 i686
+
+root@ubilinux:~# df -h
+Filesystem       Size  Used Avail Use% Mounted on
+rootfs           1.4G  813M  503M  62% /
+/dev/root        1.4G  813M  503M  62% /
+devtmpfs         480M     0  480M   0% /dev
+tmpfs             97M  292K   96M   1% /run
+tmpfs            5.0M     0  5.0M   0% /run/lock
+tmpfs            193M     0  193M   0% /run/shm
+tmpfs            481M     0  481M   0% /tmp
+/dev/mmcblk0p7    32M  5.3M   27M  17% /boot
+/dev/mmcblk0p10  1.3G  2.0M  1.3G   1% /home
+
+root@ubilinux:~# parted -l
+[  462.301381] end_request: I/O error, dev mmcblk0rpmb, sector 0
+Error: /dev/mmcblk0rpmb: unrecognised disk label                          
+[  462.378734] end_request: I/O error, dev mmcblk0rpmb, sector 0
+Warning: Error fsyncing/closing /dev/mmcblk0rpmb: Input/output error      
+Retry/Ignore? i                                                           
+
+Error: /dev/mmcblk0boot0: unrecognised disk label                         
+
+Error: /dev/mmcblk0boot1: unrecognised disk label                         
+
+Model: MMC H4G1d (sd/mmc)
+Disk /dev/mmcblk0: 3909MB
+Sector size (logical/physical): 512B/512B
+Partition Table: gpt
+
+Number  Start   End     Size    File system  Name         Flags
+ 1      1049kB  3146kB  2097kB               u-boot0
+ 2      3146kB  4194kB  1049kB               u-boot-env0
+ 3      4194kB  6291kB  2097kB               u-boot1
+ 4      6291kB  7340kB  1049kB               u-boot-env1
+ 5      7340kB  8389kB  1049kB  ext4         factory
+ 6      8389kB  33.6MB  25.2MB               panic
+ 7      33.6MB  67.1MB  33.6MB  fat16        boot
+ 8      67.1MB  1678MB  1611MB  ext4         rootfs
+ 9      1678MB  2483MB  805MB   fat32        update
+10      2483MB  3909MB  1426MB  ext4         home
+
+> EDISON has only a 4GB EMMC onboard <
+
+=== end reflash ubilinux ===
+
+=== start cfg ubilinux ===
+
+3 cfg ubilinux 
+
+3.1 move ubilinux /usr/lib, /usr/share, /var/cache  dirs to sdcard
+- format 4gb sdcard w ext4 fs
+  
+  $ sudo fdisk /dev/sdc    
+    del existing partitions
+    create a new 4GB parttion -> /dev/sdc1
+
+  $ sudo mkfs.ext4 /dev/sdc1
+
+NOTE PERMISSIONS... only root is can w, everyone else can only r & x
+                    so set permissions as needed to use this volume
+
+iqdean@iqdean-laptop:/media/4d4effc6-3770-4d36-852c-c85fc8c63cf8$ ls -al
+total 28
+drwxr-xr-x 4 root root  4096 Sep 13 00:59 .
+drwxr-xr-x 5 root root  4096 Sep 13 00:57 ..
+drwx------ 2 root root 16384 Sep 13 00:45 lost+found
+drwxrwxrwx 2 root root  4096 Sep 13 01:01 test         
+
+3.1.2 plug in 4gb sdcard to edison
+
+~# dmesg
+...
+[    9.860904] IPv6: ADDRCONF(NETDEV_UP): usb0: link is not ready
+[   11.937706] intel_scu_watchdog_evo: watchdog_stop
+[ 1536.195951] mmc1: new high speed SDHC card at address b368
+[ 1536.196889] mmcblk1: mmc1:b368 USD   3.75 GiB 
+[ 1536.198963]  mmcblk1: p1
+[ 1536.272637] mmcblk1: error -84 transferring data, sector 856, nr 8, cmd response 0x900, card status 0xb00
+[ 1536.272758] mmcblk1: retrying using single block read
+
+root@ubilinux:~# ls /dev/mmcblk1*
+/dev/mmcblk1  /dev/mmcblk1p1
+
+3.1.3 as root, create mount point, update /etc/fstab, reboot
+
+~# mkdir /mnt/mmc1 
+~# nano /etc/fstab
+root@ubilinux:~# cat /etc/fstab
+#rootfs              /                   auto       nodev,noatime,discard,barrier=1,data=ordered,noauto_da_alloc    1  1
+/dev/root            /                   ext4       defaults,noatime      0  0
+proc                 /proc               proc       defaults              0  0
+devpts               /dev/pts            devpts     mode=0620,gid=5       0  0
+#usbdevfs            /proc/bus/usb       usbdevfs   auto                  0  0
+debugfs              /sys/kernel/debug   debugfs    auto                  0  0
+tmpfs                /run                tmpfs      mode=0755,nodev,nosuid,strictatime 0  0
+#tmpfs                /var/volatile       tmpfs      defaults              0  0
+tmpfs                /tmp                tmpfs      defaults              0  0
+
+/dev/mmcblk0p7      /boot       auto    defaults     1   1
+/dev/mmcblk0p10     /home       auto    defaults     1   1
+/dev/mmcblk1p1      /mnt/mmc1   auto    defaults     1   1	<--- ADD THIS LINE
+
+root@ubilinux:~# df -h
+Filesystem       Size  Used Avail Use% Mounted on
+rootfs           1.4G  813M  503M  62% /
+/dev/root        1.4G  813M  503M  62% /
+devtmpfs         480M     0  480M   0% /dev
+tmpfs             97M  300K   96M   1% /run
+tmpfs            5.0M     0  5.0M   0% /run/lock
+tmpfs            193M     0  193M   0% /run/shm
+tmpfs            481M     0  481M   0% /tmp
+/dev/mmcblk0p7    32M  5.3M   27M  17% /boot
+/dev/mmcblk0p10  1.3G  2.0M  1.3G   1% /home
+
+~# shutdown -r now
+
+root@ubilinux:~# df -h
+Filesystem       Size  Used Avail Use% Mounted on
+rootfs           1.4G  813M  503M  62% /
+/dev/root        1.4G  813M  503M  62% /
+devtmpfs         480M     0  480M   0% /dev
+tmpfs             97M  300K   96M   1% /run
+tmpfs            5.0M     0  5.0M   0% /run/lock
+tmpfs            193M     0  193M   0% /run/shm
+tmpfs            481M     0  481M   0% /tmp
+/dev/mmcblk0p7    32M  5.3M   27M  17% /boot
+/dev/mmcblk0p10  1.3G  2.0M  1.3G   1% /home
+/dev/mmcblk1p1   3.7G  7.6M  3.5G   1% /mnt/mmc1   <-- here be 3.5G of free space on sdcard 
+
+3.1.4 as root
+
+~# cd /usr
+root@ubilinux:/usr# mv lib /mnt/mmc1/
+root@ubilinux:/usr# ln -s /mnt/mmc1/lib lib
+
+root@ubilinux:/usr# mv share /mnt/mmc1/
+root@ubilinux:/usr# ln -s /mnt/mmc1/share share
+
+root@ubilinux:/usr# cd /var
+root@ubilinux:/var# mv cache /mnt/mmc1/
+root@ubilinux:/var# ln -s /mnt/mmc1/cache cache
+
+Filesystem       Size  Used Avail Use% Mounted on
+rootfs           1.4G  360M  956M  28% /
+/dev/root        1.4G  360M  956M  28% /
+devtmpfs         480M     0  480M   0% /dev
+tmpfs             97M  300K   96M   1% /run
+tmpfs            5.0M     0  5.0M   0% /run/lock
+tmpfs            193M     0  193M   0% /run/shm
+tmpfs            481M     0  481M   0% /tmp
+/dev/mmcblk0p7    32M  5.3M   27M  17% /boot
+/dev/mmcblk0p10  1.3G  2.0M  1.3G   1% /home
+/dev/mmcblk1p1   3.7G  466M  3.0G  14% /mnt/mmc1
+
+/dev/mmcblk1p1   3.7G  466M  3.0G  14% /mnt/mmc1
+root@ubilinux:/var# ls -al /usr
+total 56
+drwxr-xr-x  8 root root   4096 Jan  1 01:05 .
+drwxr-xr-x 24 root root   4096 Jan  1 00:00 ..
+drwxr-xr-x  2 root root  20480 Feb 25  2015 bin
+drwxr-xr-x  2 root root   4096 Jul  7  2014 games
+drwxr-xr-x 36 root root  12288 Feb 24  2015 include
+lrwxrwxrwx  1 root root     13 Jan  1 01:04 lib -> /mnt/mmc1/lib
+drwxrwsr-x 11 root staff  4096 Feb 17  2015 local
+drwxr-xr-x  2 root root   4096 Feb 17  2015 sbin
+lrwxrwxrwx  1 root root     15 Jan  1 01:05 share -> /mnt/mmc1/share
+drwxr-xr-x  2 root root   4096 Jul  7  2014 src
+
+root@ubilinux:/var# ls -al /var/
+total 40
+drwxr-xr-x 10 root root  4096 Jan  1 01:07 .
+drwxr-xr-x 24 root root  4096 Jan  1 00:00 ..
+drwxr-xr-x  2 root root  4096 Jul  7  2014 backups
+lrwxrwxrwx  1 root root    15 Jan  1 01:07 cache -> /mnt/mmc1/cache
+drwxr-xr-x 22 root root  4096 Jan  1 00:00 lib
+drwxrwsr-x  2 root staff 4096 Jul  7  2014 local
+lrwxrwxrwx  1 root root     9 Oct 14  2014 lock -> /run/lock
+drwxr-xr-x  6 root root  4096 Jan  1 00:44 log
+drwxrwsr-x  2 root mail  4096 Oct 14  2014 mail
+drwxr-xr-x  2 root root  4096 Oct 14  2014 opt
+lrwxrwxrwx  1 root root     4 Oct 14  2014 run -> /run
+drwxr-xr-x  4 root root  4096 Oct 14  2014 spool
+drwxrwxrwt  2 root root  4096 Jul  7  2014 tmp
+
+=== ok, now we should be good wrt to diskspace ===
+
+3.2 get wifi cfgd
+
+as root
+~# nano /etc/network/interfaces
+root@ubilinux:~# cat /etc/network/interfaces
+# interfaces(5) file used by ifup(8) and ifdown(8)
+auto lo
+iface lo inet loopback
+
+auto usb0
+iface usb0 inet static
+    address 192.168.2.15
+    netmask 255.255.255.0
+
+auto wlan0			a uncomment to start at boot
+iface wlan0 inet dhcp
+    # For WPA
+    #wpa-ssid Emutex		b comment
+    #wpa-psk passphrase		c comment
+    # For WEP
+    wireless-essid Cisco21076	d uncomment/update
+    #wireless-mode Managed
+    wireless-key 23780e7adc	e uncomment/update
+# And the following 4 lines are for when using hostapd...
+#auto wlan0
+#iface wlan0 inet static
+#    address 192.168.42.1
+#    netmask 255.255.255.0
+
+=== reboot & verify wifi connects ===
+# shutdown -r now
+
+log back in: root:edison
+
+root@ubilinux:~# ifconfig
+lo        Link encap:Local Loopback
+          inet addr:127.0.0.1  Mask:255.0.0.0
+          inet6 addr: ::1/128 Scope:Host
+          UP LOOPBACK RUNNING  MTU:65536  Metric:1
+          RX packets:0 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:0 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:0
+          RX bytes:0 (0.0 B)  TX bytes:0 (0.0 B)
+
+usb0      Link encap:Ethernet  HWaddr 02:00:86:aa:b1:95
+          inet addr:192.168.2.15  Bcast:192.168.2.255  Mask:255.255.255.0
+          UP BROADCAST MULTICAST  MTU:1500  Metric:1
+          RX packets:0 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:0 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000
+          RX bytes:0 (0.0 B)  TX bytes:0 (0.0 B)
+
+wlan0     Link encap:Ethernet  HWaddr 78:4b:87:a6:98:77
+          inet addr:192.168.1.104  Bcast:192.168.1.255  Mask:255.255.255.0
+          inet6 addr: 2601:204:c200:6b9f:7a4b:87ff:fea6:9877/64 Scope:Global
+          inet6 addr: fe80::7a4b:87ff:fea6:9877/64 Scope:Link
+          UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1
+          RX packets:52 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:91 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000
+          RX bytes:5211 (5.0 KiB)  TX bytes:11834 (11.5 KiB)
+
+3.2.1  verfy ssh to wifi ip works
+
+iqdean@iqdean-laptop:~$ ssh root@192.168.1.104
+root@192.168.1.104's password: 
+ 
+root@ubilinux:~#	OK
+
+
+3.3 do apt-get updates
+
+apt-get update		OK
+downloads the package lists from the repositories and "updates" them to get 
+information on the newest versions of packages and their dependencies.
+
+3.4 install xboxdrv 	  OK
+
+root@ubilinux:~# apt-cache search xboxdrv
+xboxdrv - Xbox360 gamepad driver for the userspace
+
+root@ubilinux:~# apt-get install xboxdrv
+
+4 install ros from bkups above
+
+
+5 install rt-kernel from bkups above     <--- ?is rt kern even needed now?
+  not sure this is needed anymore since we got the Kangaroo x2 motion controller
+  to do the motion control... all the mc node has to do xlate ros nav stack
+  cv (m/s) / cav (rad/sec)  to  Kangaroo speed & turn commands  
+
+
+
