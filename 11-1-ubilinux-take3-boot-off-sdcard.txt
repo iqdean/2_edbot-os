@@ -6,16 +6,16 @@ http://sarweshcr.blogspot.in/2015/11/Boot-Intel-Edison-from-SD-card-with-Debian-
 
 0. flip SW1 back to J16 side... rt now its twd USB HOST & thats why flashall.sh not working in next step
 
-If you still have trouble and U-Boot is still working, you can force DFU to run without a timeout.  Open the serial console, 
-power cycle / reboot Edison, and press ENTER immediately when you see "Hit any key to stop autoboot:".  
-Then type "run do_flash".  The Edison will go into DFU until you power cycle or reboot. 
+If you still have trouble and U-Boot is still working, you can force DFU to run without a timeout.  Open the serial console,
+power cycle / reboot Edison, and press ENTER immediately when you see "Hit any key to stop autoboot:".
+Then type "run do_flash".  The Edison will go into DFU until you power cycle or reboot.
 
 1. from ubu12.04 notebook, flash ubilinux to emmc  REF: 7-ubilinux-take2.txt
 
-   J3  <--usb---> PC   term1:  <anydir             > $ sudo screen /dev/ttyUSB0 115200    
+   J3  <--usb---> PC   term1:  <anydir             > $ sudo screen /dev/ttyUSB0 115200
    J16 <--usb---> PC   term2:  <ubilinx toFlash dir> $ sudo flashall.sh                    plugging in J16 pwrs up ed
 
-SW1 set for J16, flashall.sh works, reflashes ok, 
+SW1 set for J16, flashall.sh works, reflashes ok,
 
 From boot spew, see
 ...
@@ -36,7 +36,7 @@ tmpfs            193M     0  193M   0% /run/shm
 tmpfs            481M     0  481M   0% /tmp
 /dev/mmcblk0p7    32M  5.3M   27M  17% /boot
 /dev/mmcblk0p10  1.3G  2.0M  1.3G   1% /home
- 
+
 root@ubilinux:~# ls -al
 total 28
 drwx------  5 root root 4096 Feb 24  2015 .
@@ -58,7 +58,7 @@ drwxr-xr-x 11 root root 4096 Feb 24  2015 mraa
 drwxrwxr-x 10 1000 1000 4096 Feb 24  2015 swig-3.0.5
 
 root@ubilinux:~# python
-Python 2.7.3 (default, Mar 14 2014, 11:57:14) 
+Python 2.7.3 (default, Mar 14 2014, 11:57:14)
 [GCC 4.7.2] on linux2
 Type "help", "copyright", "credits" or "license" for more information.
 >>> import mraa
@@ -95,37 +95,37 @@ iface wlan0 inet dhcp
 ---- reboot----
 
 root@ubilinux:~# ifconfig
-lo        Link encap:Local Loopback  
+lo        Link encap:Local Loopback
           inet addr:127.0.0.1  Mask:255.0.0.0
           inet6 addr: ::1/128 Scope:Host
           UP LOOPBACK RUNNING  MTU:65536  Metric:1
           RX packets:0 errors:0 dropped:0 overruns:0 frame:0
           TX packets:0 errors:0 dropped:0 overruns:0 carrier:0
-          collisions:0 txqueuelen:0 
+          collisions:0 txqueuelen:0
           RX bytes:0 (0.0 B)  TX bytes:0 (0.0 B)
 
-usb0      Link encap:Ethernet  HWaddr 02:00:86:aa:b1:95  
+usb0      Link encap:Ethernet  HWaddr 02:00:86:aa:b1:95
           inet addr:192.168.2.15  Bcast:192.168.2.255  Mask:255.255.255.0
           UP BROADCAST MULTICAST  MTU:1500  Metric:1
           RX packets:0 errors:0 dropped:0 overruns:0 frame:0
           TX packets:0 errors:0 dropped:0 overruns:0 carrier:0
-          collisions:0 txqueuelen:1000 
+          collisions:0 txqueuelen:1000
           RX bytes:0 (0.0 B)  TX bytes:0 (0.0 B)
 
-wlan0     Link encap:Ethernet  HWaddr 78:4b:87:a6:98:77  
+wlan0     Link encap:Ethernet  HWaddr 78:4b:87:a6:98:77
           inet addr:192.168.1.104  Bcast:192.168.1.255  Mask:255.255.255.0
           inet6 addr: 2601:204:c200:6b9f:7a4b:87ff:fea6:9877/64 Scope:Global
           inet6 addr: fe80::7a4b:87ff:fea6:9877/64 Scope:Link
           UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1
           RX packets:63 errors:0 dropped:0 overruns:0 frame:0
           TX packets:109 errors:0 dropped:0 overruns:0 carrier:0
-          collisions:0 txqueuelen:1000 
+          collisions:0 txqueuelen:1000
           RX bytes:5978 (5.8 KiB)  TX bytes:13646 (13.3 KiB)
 
 ---- verify ssh over wifi works ----
 
 iqdean@iqdean-laptop:~$ ssh root@192.168.1.104
-root@192.168.1.104's password: 
+root@192.168.1.104's password:
 Linux ubilinux 3.10.17-yocto-standard-r2 #7 SMP PREEMPT Thu Feb 26 09:57:06 UTC 2015 i686
 
 The programs included with the Debian GNU/Linux system are free software;
@@ -135,13 +135,13 @@ individual files in /usr/share/doc/*/copyright.
 Debian GNU/Linux comes with ABSOLUTELY NO WARRANTY, to the extent
 permitted by applicable law.
 Last login: Fri Dec  4 06:05:14 2015 from iqdean-laptop.hsd1.ca.comcast.net
-root@ubilinux:~# 
+root@ubilinux:~#
 
 
 2. on u12.04 ntebook, prep sdcard...use GParted to create ext4 partition, unplug/replug sdcard
    note the uuid of sdcard when u replug it
 
-2.1 
+2.1
 $ sudo fdisk /dev/sdc	d-delete, n-new, w-write, unplug/replug
 
 iqdean@iqdean-laptop:~$ sudo fdisk -l /dev/sdc
@@ -156,7 +156,7 @@ Disk identifier: 0x00000000
    Device Boot      Start         End      Blocks   Id  System
 /dev/sdc1            2048    31116287    15557120   83  Linux
 
-2.2 
+2.2
 iqdean@iqdean-laptop:~$ sudo mkfs.ext4 /dev/sdc1
 mke2fs 1.42 (29-Nov-2011)
 Filesystem label=
@@ -171,13 +171,13 @@ Maximum filesystem blocks=3984588800
 119 block groups
 32768 blocks per group, 32768 fragments per group
 8176 inodes per group
-Superblock backups stored on blocks: 
+Superblock backups stored on blocks:
 	32768, 98304, 163840, 229376, 294912, 819200, 884736, 1605632, 2654208
 
-Allocating group tables: done                            
-Writing inode tables: done                            
+Allocating group tables: done
+Writing inode tables: done
 Creating journal (32768 blocks): done
-Writing superblocks and filesystem accounting information: done   
+Writing superblocks and filesystem accounting information: done
 
 2.3 unplug/plug
 
@@ -272,14 +272,14 @@ none            3.0G   19M  3.0G   1% /run/shm
 -----
 
 4. connect to edison on usb serial console via J3                      << u have to do this to mess with uboot
-   on edison running ubilinux out of emmc, plug in the sdcard & see where it shows up via 
+   on edison running ubilinux out of emmc, plug in the sdcard & see where it shows up via
 
    $ dmesg | tail -n 10
 ...
 [   15.840152] wl_bss_connect_done succeeded with c0:c1:c0:64:41:8a
 [   21.293507] intel_scu_watchdog_evo: watchdog_stop
 [  863.422624] mmc1: new high speed SDHC card at address aaaa
-[  863.423560] mmcblk1: mmc1:aaaa SP16G 14.8 GiB 
+[  863.423560] mmcblk1: mmc1:aaaa SP16G 14.8 GiB
 [  863.436253]  mmcblk1: p1
 
 root@ubilinux:~# fdisk -l /dev/mmcblk1
@@ -298,11 +298,11 @@ Disk identifier: 0x00000000
 4.1 --- modify the /etc/fstab system file in edison to make it automount the sdcard ----
 
 root@ubilinux:~# blkid
-/dev/mmcblk0p5: UUID="6a7d7dae-b5f5-43fa-9211-4c9c029c701e" TYPE="ext4" 
-/dev/mmcblk0p7: SEC_TYPE="msdos" UUID="260F-37DF" TYPE="vfat" 
-/dev/mmcblk0p8: UUID="e2cba1bd-9c9b-403b-b88b-87c3fdc1cc58" TYPE="ext4" 
-/dev/mmcblk0p9: LABEL="Edison" UUID="2612-613A" TYPE="vfat" 
-/dev/mmcblk0p10: UUID="2880b5fe-ca7f-4842-80e4-daba750bde84" TYPE="ext4" 
+/dev/mmcblk0p5: UUID="6a7d7dae-b5f5-43fa-9211-4c9c029c701e" TYPE="ext4"
+/dev/mmcblk0p7: SEC_TYPE="msdos" UUID="260F-37DF" TYPE="vfat"
+/dev/mmcblk0p8: UUID="e2cba1bd-9c9b-403b-b88b-87c3fdc1cc58" TYPE="ext4"
+/dev/mmcblk0p9: LABEL="Edison" UUID="2612-613A" TYPE="vfat"
+/dev/mmcblk0p10: UUID="2880b5fe-ca7f-4842-80e4-daba750bde84" TYPE="ext4"
 /dev/mmcblk1p1: UUID="317e4bc1-aa8f-4ddf-a4e8-7a2b3029af6b" TYPE="ext4" 	<<< NOTE
 
 4.1.1 --- nano /etc/fstab --------
@@ -322,7 +322,7 @@ tmpfs                /tmp                tmpfs      defaults              0  0
 /dev/mmcblk0p10     /home       auto    defaults     1   1
 /dev/mmcblk1p1      /media/sdcard   ext4    defaults        0 0				<< add this line
 
-4.1.2 ---- mkdir -p /media/sdcard/  
+4.1.2 ---- mkdir -p /media/sdcard/
            reboot
 
 root@ubilinux:~# df -h
@@ -343,11 +343,11 @@ tmpfs            481M     0  481M   0% /tmp
 setenv mmc-bootargs 'setenv bootargs root=${myrootfs} rootdelay=3 rootfstype=ext4 ${bootargs_console} ${bootargs_debug} systemd.unit=${bootargs_target}.target hardware_id=${hardware_id} g_multi.iSerialNumber=${serial#} g_multi.dev_addr=${usb0addr}'
 
 setenv myrootfs_sdcard /dev/mmcblk1p1
-                                                                         to view kernel log files, 
+                                                                         to view kernel log files,
                                                                          connect putty to edision via J3 serial console
 
                      PARTUUID=012b3303-34ac-284d-99b4-34e03a2335f4  <<<< A1: from kernel command line info in the startup boot msgs
-setenv myrootfs_emmc PARTUUID=012b3303-34ac-284d-99b4-34e03a2335f4       
+setenv myrootfs_emmc PARTUUID=012b3303-34ac-284d-99b4-34e03a2335f4
                               \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\____  Q1: where do you get this from???
 
 setenv do_boot_emmc 'setenv myrootfs ${myrootfs_emmc}; run do_boot'
@@ -367,7 +367,7 @@ boot > setenv do_boot_emmc 'setenv myrootfs ${myrootfs_emmc}; run do_boot'
 boot > setenv do_boot_sdcard 'setenv myrootfs ${myrootfs_sdcard}; run do_boot'
 
 boot > setenv myrootfs /dev/mmcblk1p1   \
-       OR                                > set defaults 
+       OR                                > set defaults
        setenv myrootfs myrootfs_emmc    /
 
 boot > saveenv
@@ -380,7 +380,7 @@ boot > run do_boot_sdcard	< boots ok
 Debian GNU/Linux 7 ubilinux ttyMFD2
 
 ubilinux login: root
-Password: edison 
+Password: edison
 
 Linux ubilinux 3.10.17-yocto-standard-r2 #7 SMP PREEMPT Thu Feb 26 09:57:06 UTC 2015 i686
 
@@ -401,7 +401,7 @@ tmpfs            193M     0  193M   0% /run/shm
 tmpfs            481M     0  481M   0% /tmp
 /dev/mmcblk0p7    32M  5.3M   27M  17% /boot
 /dev/mmcblk0p10  1.3G  2.0M  1.3G   1% /home
-root@ubilinux:~# 
+root@ubilinux:~#
 
 ---- shutdown -r now ---- on subsequent boots, it wont autoboot to sdcard ??? -----
 
@@ -462,24 +462,15 @@ tmpfs            481M     0  481M   0% /tmp
 /dev/mmcblk0p10  1.3G  2.0M  1.3G   1% /home
 /dev/mmcblk1p1    15G  848M   13G   7% /media/sdcard
 
------------- 
+------------
 If you want it back permanently, run the below (double-check the UUID to match the one for your case):
 
  root@edison:~# fw_setenv myrootfs 'PARTUUID=012b3303-34ac-284d-99b4-34e03a2335f4'
- 
+
 If you want to switch to eMMC just occassionally, during the boot, on the serial console, when it prompts to press a key to stop booting, press that any key and then run the below command in the U-Boot command prompt that appears:
 run do_boot_emmc
- 
+
 If you switch to booting from eMMC as the default (per the first part of the above), then you can occassionally boot from SD card by running the below from the U-Boot command prompt:
 run do_boot_sdcard
 
 --------------
-
-
-
-
-
-
-
-
-
