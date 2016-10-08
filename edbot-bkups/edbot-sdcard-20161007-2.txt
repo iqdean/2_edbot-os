@@ -1,0 +1,48 @@
+10-7-2016
+2nd backup of edbot sdcard image 
+- odometry works
+
+- robot network works
+
+  |------ onboard ----------------|
+                                  |----- offboard---|
+  ROSMASTER            
+  edison <--- usb0 ---> Acer <---wlan0
+                                 hotspot  <----> HPDM4 <--- xbox360 joystick
+                                                  |         node roslibjoy.js
+                                                  $ rqt robot tools robot steering
+                                                  $ rviz rviz
+ 
+Power Down Robot, pull sdcard, stick it into IOGEAR USB Card reader
+
+HPDM4 <--usb-iogear <- edbot sdcard
+    \_<--usb-----------WD 120GB USB HD
+
+$ mount    figure out where ea sdcard is and where WD USB HD is
+
+iqdean@hpdm4:~$ sudo dd if=/dev/sdb | bzip2 > /media/iqdean/26689795-c2c6-4ab9-aaa3-84dccc817016/edbot-bkups/edbot-sdcard-20161007-2.img.bz2 
+... ~ 22 minutes later ...
+31116288+0 records in
+31116288+0 records out
+15931539456 bytes (16 GB) copied, 1286.88 s, 12.4 MB/s
+iqdean@hpdm4:~$ 
+
+To watch progress, observe size of dest file as it's being created:
+open another terminal & do:
+
+iqdean@hpdm4:~$ ls -al /media/iqdean/26689795-c2c6-4ab9-aaa3-84dccc817016/edbot-bkups
+-rwxrwxrwx 1 iqdean iqdean     54258 Sep  3 13:56 14-2-backup-restore-edison-img.txt
+-rwxrwxr-x 1 iqdean iqdean      6804 Sep  6 13:48 14-2-bkm-backup-restore-edbot.txt
+-rw-rw-r-- 1 iqdean iqdean 797589014 Sep  2 13:00 edbot-sdcard-20160902-1.img.bz2
+-rw-rw-r-- 1 iqdean iqdean 798253307 Oct  7 17:33 edbot-sdcard-20161007-2.img.bz2
+-rw-rw-r-- 1 iqdean iqdean      1076 Oct  7 17:14 edbot-sdcard-20161007-2.txt
+-rw-rw-r-- 1 iqdean iqdean       894 Oct  7 17:11 edbot-sdcard-20161007-2.txt~
+drwxrwxr-x 2 iqdean iqdean      4096 Sep  3 13:01 older
+-rwxrwxrwx 1 iqdean iqdean 525360770 Aug 16  2015 ubilinux-edison-150309.tar.gz
+iqdean@hpdm4:~$ 
+
+=== we need to move the github/2_edbot_os dir to WD HD, that way as soon as the back is made
+    we can update git repo
+
+
+
