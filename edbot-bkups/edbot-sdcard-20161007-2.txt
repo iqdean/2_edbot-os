@@ -70,8 +70,13 @@ git rm file.txt removes the file from the repo but also deletes it from the loca
 To remove the file from the repo and not delete it from the local file system use:
 git rm --cached file.txt
 
-And to push changes to remote repo
+----- rm 1st backup img on remote and local filesys to save space -----
 
-git push origin branch_name
+git rm edbot-sdcard-20160902-1.img.bz2
+git commit -m "removing file to save storage"
+git push origin master
+
+
+
 
 
