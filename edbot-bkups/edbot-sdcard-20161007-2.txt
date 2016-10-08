@@ -44,5 +44,34 @@ iqdean@hpdm4:~$
 === we need to move the github/2_edbot_os dir to WD HD, that way as soon as the back is made
     we can update git repo
 
+iqdean@hpdm4:~/u1404/DEV-SW/github/2_edbot-os/edbot-bkups$ ls -al
+total 779564
+drwxrwxrwx 1 root root       480 Oct  7 17:42 .
+drwxrwxrwx 1 root root      4096 Sep  6 13:46 ..
+-rwxrwxrwx 1 root root      6804 Sep  6 13:48 14-2-bkm-backup-restore-edbot.txt
+                                              edbot-sdcard-20160902-1.img.bz2     < rm this to save space, keep latest img on github
+-rwxrwxrwx 1 root root 798253307 Oct  7 17:41 edbot-sdcard-20161007-2.img.bz2     < cp from wd hd to here
+-rwxrwxrwx 1 root root      1987 Oct  7 17:42 edbot-sdcard-20161007-2.txt         <
+
+iqdean@hpdm4:~/u1404/DEV-SW/github/2_edbot-os/edbot-bkups$ git add edbot-sdcard-20161007-2.img.bz2 
+iqdean@hpdm4:~/u1404/DEV-SW/github/2_edbot-os/edbot-bkups$ git add edbot-sdcard-20161007-2.txt 
+iqdean@hpdm4:~/u1404/DEV-SW/github/2_edbot-os/edbot-bkups$ git commit -m "edbot img bkup 2: odometery robonet works"
+iqdean@hpdm4:~/u1404/DEV-SW/github/2_edbot-os/edbot-bkups$ git push origin master
+Username for 'https://github.com': iqdean
+Password for 'https://iqdean@github.com': 
+Username for 'https://github.com': iqdean
+Password for 'https://iqdean@github.com': 
+Git LFS: (0 of 1 files) 223.19 MB / 761.27 MB     <--- this takes a while                                                        
+
+Removing files from git repo vs local filesystem
+------------------------------------------------
+git rm file.txt removes the file from the repo but also deletes it from the local file system.
+
+To remove the file from the repo and not delete it from the local file system use:
+git rm --cached file.txt
+
+And to push changes to remote repo
+
+git push origin branch_name
 
 
